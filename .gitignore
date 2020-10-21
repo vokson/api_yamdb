@@ -18,3 +18,4 @@ media/
 
 *.sqlite3
 */migrations/
+sent_emails/

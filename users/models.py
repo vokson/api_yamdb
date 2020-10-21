@@ -3,10 +3,10 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 
-from loguru import logger
-import random
+import uuid
+# from .views import create_confirmation_code
 
-random_string = str(random.randint(10000, 99999))
+random_string = uuid.uuid4()
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -16,8 +16,6 @@ class MyUserManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
         )
-
-        logger.debug(user)
 
         user.set_password(password)
         user.save(using=self._db)
@@ -29,11 +27,23 @@ class MyUserManager(BaseUserManager):
             password=password,
         )
         user.is_admin = True
+        user.role = MyUser.ADMIN
         user.save(using=self._db)
         return user
 
 
 class MyUser(AbstractBaseUser):
+
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+
+    ROLES = [
+        (ADMIN, 'admin'),
+        (MODERATOR, 'moderator'),
+        (USER, 'user'),
+    ]
+
     username = models.CharField(
         unique=True,
         max_length=150,
@@ -47,6 +57,12 @@ class MyUser(AbstractBaseUser):
         help_text='Input e-mail',
         max_length=255,
         unique=True,
+    )
+
+    role = models.CharField(
+        max_length=30,
+        choices=ROLES,
+        default=USER,
     )
 
     confirmation_code = models.CharField(

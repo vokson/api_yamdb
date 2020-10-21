@@ -29,7 +29,8 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = MyUser
-        fields = ('email', 'password', 'is_active', 'is_admin')
+        fields = ('email', )
+        # fields = ('email', 'password', 'is_active', 'is_admin')
 
     def clean_password(self):
         return self.initial['password']
@@ -43,14 +44,15 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_admin', 'is_active', )
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('email', 'password', 'username', 'role')}),
         ('Permissions', {'fields': ('is_admin',)}),
         ('Access', {'fields': ('is_active', 'confirmation_code')}),
+        ('Credentials', {'fields': ('first_name', 'last_name', 'description')}),
     )
 
     add_fieldsets = (
         (None, {
-            'fields': ('email', 'password',),
+            'fields': ('email', 'password', 'username', 'role'),
         }),
     )
 
