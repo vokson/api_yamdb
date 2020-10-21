@@ -33,3 +33,4 @@ flake8-quotes==3.2.0
 isort==5.6.4
 # django-cors-headers==3.5.0
 djangorestframework-simplejwt==4.4.0
+loguru==0.5.3

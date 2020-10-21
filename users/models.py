@@ -3,6 +3,10 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 
+from loguru import logger
+import random
+
+random_string = str(random.randint(10000, 99999))
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -12,6 +16,8 @@ class MyUserManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
         )
+
+        logger.debug(user)
 
         user.set_password(password)
         user.save(using=self._db)
@@ -41,6 +47,14 @@ class MyUser(AbstractBaseUser):
         help_text='Input e-mail',
         max_length=255,
         unique=True,
+    )
+
+    confirmation_code = models.CharField(
+        max_length=128,
+        blank=False,
+        verbose_name='Confirmation Code',
+        help_text='Input confirmation code',
+        default=random_string
     )
 
     first_name = models.CharField(

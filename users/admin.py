@@ -5,19 +5,20 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 # from django.core.exceptions import ValidationError
 
+
 from .models import MyUser
 
 
 class UserCreationForm(forms.ModelForm):
-    password = forms.CharField(label='Confimation code', widget=forms.PasswordInput)
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)
 
     class Meta:
         model = MyUser
-        fields = ('email',)
+        fields = ('email', )
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])
+        user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
         return user
@@ -38,13 +39,13 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email',  'is_admin', 'is_active')
+    list_display = ('email', 'username', 'confirmation_code', 'is_admin', 'is_active')
     list_filter = ('is_admin', 'is_active', )
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Permissions', {'fields': ('is_admin',)}),
-        ('Access', {'fields': ('is_active',)}),
+        ('Access', {'fields': ('is_active', 'confirmation_code')}),
     )
 
     add_fieldsets = (
