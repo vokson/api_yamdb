@@ -4,17 +4,24 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
 
 from .models import MyUserManager
-from .serializers import UserSerializer
-from .permissions import IsMyself
+from .serializers import MyUserSerializer, UserSerializer
+from .permissions import IsMyself, IsAdminRole
+from rest_framework.reverse import reverse, reverse_lazy
+from django.http.response import HttpResponseRedirect
+
+import uuid
+from loguru import logger
 
 User = get_user_model()
+
 
 
 
@@ -48,6 +55,9 @@ def obtain_confirmation_code(request):
             password=''
         )
 
+        user.confirmation_code = uuid.uuid4()
+        user.save()
+
     confirmation_code = user.confirmation_code
 
     send_mail(
@@ -77,10 +87,15 @@ def obtain_auth_token(request):
     return Response({'token': str(refresh.access_token)})
 
 
-class UserViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class MyUserViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet
+):
+
     queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsMyself, ]
+    serializer_class = MyUserSerializer
+    permission_classes = [IsMyself]
 
     def get_object(self):
         pk = self.kwargs.get('pk')
@@ -88,7 +103,24 @@ class UserViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         if pk == 'me':
             return self.request.user
 
-        return super(UserViewSet, self).get_object()
+        return super(MyUserViewSet, self).get_object()
 
-    # def get_queryset(self):
-        # return User.objects.filter(pk=self.request.user.pk)
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminRole | IsAdminUser]
+    filterset_fields = ['username']
+    lookup_field = 'username'
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        # permission_classes=[IsAuthenticated]
+    )
+    def me(self, request, pk=None):
+        url = reverse_lazy('myuser-detail', args=[self.request.user.username], request=request)
+        logger.debug(url)
+
+        return HttpResponseRedirect(redirect_to=url)
+        # return self.retrieve(request=request, pk=self.request.user.username)

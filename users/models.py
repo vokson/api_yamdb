@@ -3,26 +3,27 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 
-import uuid
-# from .views import create_confirmation_code
 
-random_string = uuid.uuid4()
+
+
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, username, email, password=None):
         if not email:
             raise ValueError('Users must have an email address')
 
         user = self.model(
             email=self.normalize_email(email),
+            username=username
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None):
+    def create_superuser(self, username, email, password=None):
         user = self.create_user(
+            username,
             email,
             password=password,
         )
@@ -33,7 +34,6 @@ class MyUserManager(BaseUserManager):
 
 
 class MyUser(AbstractBaseUser):
-
     ADMIN = 'admin'
     MODERATOR = 'moderator'
     USER = 'user'
@@ -49,7 +49,8 @@ class MyUser(AbstractBaseUser):
         max_length=150,
         verbose_name='Username',
         help_text='Input username',
-        null=True,
+        blank=False
+        # null=True,
     )
 
     email = models.EmailField(
@@ -67,10 +68,8 @@ class MyUser(AbstractBaseUser):
 
     confirmation_code = models.CharField(
         max_length=128,
-        blank=False,
         verbose_name='Confirmation Code',
         help_text='Input confirmation code',
-        default=random_string
     )
 
     first_name = models.CharField(
@@ -87,7 +86,7 @@ class MyUser(AbstractBaseUser):
         help_text='Input last name'
     )
 
-    description = models.TextField(
+    bio = models.TextField(
         blank=True,
         verbose_name='Description',
         help_text='Add description'
@@ -100,6 +99,9 @@ class MyUser(AbstractBaseUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    class Meta:
+        ordering = ['email']
 
     def __str__(self):
         return self.email
