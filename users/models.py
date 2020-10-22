@@ -1,10 +1,5 @@
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser
-)
-
-
-
 
 
 class MyUserManager(BaseUserManager):
@@ -50,7 +45,6 @@ class MyUser(AbstractBaseUser):
         verbose_name='Username',
         help_text='Input username',
         blank=False
-        # null=True,
     )
 
     email = models.EmailField(

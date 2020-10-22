@@ -1,10 +1,8 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-# from django.core.exceptions import ValidationError
-
+from django.contrib.auth.models import Group
 
 from .models import MyUser
 
@@ -30,7 +28,6 @@ class UserChangeForm(forms.ModelForm):
     class Meta:
         model = MyUser
         fields = ('email', )
-        # fields = ('email', 'password', 'is_active', 'is_admin')
 
     def clean_password(self):
         return self.initial['password']
@@ -44,16 +41,29 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_admin', 'is_active', )
 
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'username', 'role')}),
-        ('Permissions', {'fields': ('is_admin',)}),
-        ('Access', {'fields': ('is_active', 'confirmation_code')}),
-        ('Credentials', {'fields': ('first_name', 'last_name', 'description')}),
+        (
+            None,
+            {'fields': ('email', 'password', 'username', 'role')}
+        ),
+        (
+            'Permissions',
+            {'fields': ('is_admin',)}
+        ),
+        (
+            'Access',
+            {'fields': ('is_active', 'confirmation_code')}
+        ),
+        (
+            'Credentials',
+            {'fields': ('first_name', 'last_name', 'description')}
+        ),
     )
 
     add_fieldsets = (
-        (None, {
-            'fields': ('email', 'password', 'username', 'role'),
-        }),
+        (
+            None,
+            {'fields': ('email', 'password', 'username', 'role')}
+        ),
     )
 
     search_fields = ('email',)
