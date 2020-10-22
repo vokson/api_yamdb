@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.core.validators import validate_email
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -87,6 +87,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(
         methods=['get', 'patch'],
         detail=False,
+        permission_classes=[IsAuthenticated]
     )
     def me(self, request, pk=None):
         if request.method == 'GET':
