@@ -116,11 +116,15 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(
         methods=['get', 'patch'],
         detail=False,
-        # permission_classes=[IsAuthenticated]
+        permission_classes=[IsAuthenticated]
     )
     def me(self, request, pk=None):
-        url = reverse_lazy('myuser-detail', args=[self.request.user.username], request=request)
-        logger.debug(url)
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
 
-        return HttpResponseRedirect(redirect_to=url)
-        # return self.retrieve(request=request, pk=self.request.user.username)
+        if request.method == 'PATCH':
+            serializer = self.get_serializer(request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
