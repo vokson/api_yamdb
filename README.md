@@ -26,7 +26,7 @@ Perfom migrations of database
 $ python manage.py migrate
 ```
 
-Seed databse with test data
+Seed database with test data
 ```sh
 $ python manage.py datatosqlite
 ```
