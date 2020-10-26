@@ -1,12 +1,10 @@
 import os
-import uuid
 import sqlite3
+import uuid
 
 from api_yamdb.settings import BASE_DIR, DATABASES
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand, CommandError
-
-from category.models import Categories, Titles, Genres
+from django.core.management.base import BaseCommand
 
 User = get_user_model()
 
@@ -28,32 +26,7 @@ class Command(BaseCommand):
 
         return arr
 
-    def __import_table(self, obj_model, filename, new_names={}, related_keys={}):
-
-        path_to_file = os.path.join(BASE_DIR, 'data', filename)
-        with open(file=path_to_file, mode='r', encoding='utf-8') as f:
-
-            names = [x.strip() for x in f.readline().split(',')]
-            names = [new_names[x] if x in new_names else x for x in names]
-
-            for line in f:
-                values = self.__custom_split(line)
-                properties = dict(zip(names, values))
-
-                # Replace model_id with model object
-                for key in properties:
-                    if key in related_keys:
-                        pk = int(properties[key])
-                        model = related_keys[key]
-                        obj = model.objects.filter(pk=pk).first()
-                        properties[key] = obj
-
-                try:
-                    obj_model.objects.create(**properties)
-                except Exception as e:
-                    raise CommandError(f'Error during creation of model with properties {properties}. {e}')
-
-    def __import_many_to_many_relations(self, filename, new_names={}):
+    def __import_table(self, filename, db_table_name, new_names={}, default_props={}):
         conn = None
         try:
             conn = sqlite3.connect(DATABASES['default']['NAME'])
@@ -61,63 +34,79 @@ class Command(BaseCommand):
             print(e)
 
         cur = conn.cursor()
-        cur.execute('DELETE FROM category_titles_genre;')
+        cur.execute(f'DELETE FROM {db_table_name}')
         conn.commit()
 
         path_to_file = os.path.join(BASE_DIR, 'data', filename)
         with open(file=path_to_file, mode='r', encoding='utf-8') as f:
             names = [x.strip() for x in f.readline().split(',')]
             names = [new_names[x] if x in new_names else x for x in names]
+            names += default_props.keys()
             names = ','.join(names)
 
             for line in f:
-                line = line.strip()
-                cur.execute(f'INSERT INTO category_titles_genre ({names}) VALUES ({line})')
+                values = self.__custom_split(line)
+                values += default_props.values()
+                values = [x.strip('"') for x in values]
+                values = ','.join([f'"{x}"' for x in values])
+                cur.execute(f'INSERT INTO {db_table_name} ({names}) VALUES ({values})')
 
             conn.commit()
 
         cur.close()
         conn.close()
 
-        return conn
-
     def handle(self, *args, **options):
 
-        try:
-            User.objects.all().delete()
-            Categories.objects.all().delete()
-            Genres.objects.all().delete()
-            Titles.objects.all().delete()
-
-        except Exception as e:
-            raise CommandError(f'Users table can not be cleaned. {e}')
-
-        self.stdout.write(self.style.SUCCESS('Clean users table - OK'))
-
-        User.objects.create_superuser(username='admin', email='admin@yamdb.fake', password='1234')
-        self.stdout.write(self.style.SUCCESS('Create super user admin/admin@yamdb.fake/1234 - OK'))
-
         # IMPORT USERS.CSV
-        self.__import_table(User, 'users.csv', {'description': 'bio'})
+        # self.__import_table(User, 'users.csv', {'description': 'bio'})
+        self.__import_table(
+            filename='users.csv',
+            db_table_name='users_myuser',
+            new_names={'description': 'bio'},
+            default_props={
+                'password': '',
+                'confirmation_code': '',
+                'is_active': '1',
+                'is_admin': '0'
+            }
+        )
         self.stdout.write(self.style.SUCCESS('Import users.csv - OK'))
 
         # IMPORT CATEGORY.CSV
-        self.__import_table(Categories, 'category.csv')
+        self.__import_table(
+            filename='category.csv',
+            db_table_name='category_categories',
+        )
         self.stdout.write(self.style.SUCCESS('Import category.csv - OK'))
 
         # IMPORT GENRE.CSV
-        self.__import_table(Genres, 'genre.csv')
+        self.__import_table(
+            filename='genre.csv',
+            db_table_name='category_genres',
+        )
         self.stdout.write(self.style.SUCCESS('Import genre.csv - OK'))
 
         # IMPORT TITLES.CSV
-        self.__import_table(Titles, 'titles.csv', {}, {
-            'category': Categories
-        })
+        self.__import_table(
+            filename='titles.csv',
+            db_table_name='category_titles',
+            new_names={'category': 'category_id'},
+            default_props={'description': ''}
+        )
         self.stdout.write(self.style.SUCCESS('Import titles.csv - OK'))
 
-        # IMPORT TITLE_GENRE RALATIONS GENRE_TITLE.CSV
-        self.__import_many_to_many_relations('genre_title.csv', {
-            'title_id': 'titles_id',
-            'genre_id': 'genres_id'
-        })
+        # IMPORT TITLE_GENRE RELATIONS GENRE_TITLE.CSV
+        self.__import_table(
+            filename='genre_title.csv',
+            db_table_name='category_titles_genre',
+            new_names={
+                'title_id': 'titles_id',
+                'genre_id': 'genres_id'
+            }
+        )
         self.stdout.write(self.style.SUCCESS('Import genre_title.csv - OK'))
+
+        # CREATE SUPER USER
+        User.objects.create_superuser(username='admin', email='admin@yamdb.fake', password='1234')
+        self.stdout.write(self.style.SUCCESS('Create super user admin/admin@yamdb.fake/1234 - OK'))
