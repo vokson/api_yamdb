@@ -1,7 +1,8 @@
 import os
 import uuid
+import sqlite3
 
-from api_yamdb.settings import BASE_DIR
+from api_yamdb.settings import BASE_DIR, DATABASES
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
@@ -52,6 +53,34 @@ class Command(BaseCommand):
                 except Exception as e:
                     raise CommandError(f'Error during creation of model with properties {properties}. {e}')
 
+    def __import_many_to_many_relations(self, filename, new_names={}):
+        conn = None
+        try:
+            conn = sqlite3.connect(DATABASES['default']['NAME'])
+        except Exception as e:
+            print(e)
+
+        cur = conn.cursor()
+        cur.execute('DELETE FROM category_titles_genre;')
+        conn.commit()
+
+        path_to_file = os.path.join(BASE_DIR, 'data', filename)
+        with open(file=path_to_file, mode='r', encoding='utf-8') as f:
+            names = [x.strip() for x in f.readline().split(',')]
+            names = [new_names[x] if x in new_names else x for x in names]
+            names = ','.join(names)
+
+            for line in f:
+                line = line.strip()
+                cur.execute(f'INSERT INTO category_titles_genre ({names}) VALUES ({line})')
+
+            conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return conn
+
     def handle(self, *args, **options):
 
         try:
@@ -85,3 +114,10 @@ class Command(BaseCommand):
             'category': Categories
         })
         self.stdout.write(self.style.SUCCESS('Import titles.csv - OK'))
+
+        # IMPORT TITLE_GENRE RALATIONS GENRE_TITLE.CSV
+        self.__import_many_to_many_relations('genre_title.csv', {
+            'title_id': 'titles_id',
+            'genre_id': 'genres_id'
+        })
+        self.stdout.write(self.style.SUCCESS('Import genre_title.csv - OK'))
