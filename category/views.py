@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ViewSetMixin, ModelViewSet
 
 from category.models import Categories, Genres, Titles
-from category.permissions import IsOwnerOrReadOnly
+from category.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from category.serializers import GenresSerializer, CategoriesSerializer, TitlesSerializer
 
 
@@ -20,7 +20,7 @@ class CreateListViewSet(
 class CategoryViewSet(CreateListViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
@@ -30,13 +30,22 @@ class CategoryViewSet(CreateListViewSet):
 class GenresViewSet(CreateListViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
 
 
+# class TitlesViewSet(ModelViewSet):
+#     queryset = Titles.objects.all()
+#     serializer_class = TitlesSerializer
+#     permission_classes = [IsAdminOrReadOnly]
+#     pagination_class = PageNumberPagination
+#     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+#     filter_fields = ('category', 'genre')
+#     search_fields = ('name', 'year')
+#     lookup_field = 'slug'
 class TitlesViewSet(ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer

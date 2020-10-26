@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework_simplejwt import serializers
 
 from category.models import Categories, Genres, Titles
 
@@ -7,15 +7,13 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Categories
-        fields = ('name', 'slug')
-        lookup_field = 'slug'
+        fields = '__all__'
 
 
 class GenresSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genres
-        fields = ('name', 'slug')
-        lookup_field = 'slug'
+        fields = '__all__'
 
 
 class TitlesSerializer(serializers.ModelSerializer):
