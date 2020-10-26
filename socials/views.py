@@ -1,16 +1,20 @@
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 
 from socials.models import Review
+from socials.permissions import IsAuthorOrReadOnly
 from socials.serializers import ReviewSerializer, CommentSerializer
 
+
+# TODO:
+#  1. change response to NO paginated data
+#  2. change permission from IsAuthorOrReadOnly to IsAuthorOrReadOnly and IsModerator and IsAdmin
 
 class ReviewView(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    authentication_classes = [IsAuthenticated]
+    permission_classes = [IsAuthorOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -18,9 +22,10 @@ class ReviewView(viewsets.ModelViewSet):
 
 class CommentView(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthorOrReadOnly]
 
     def perform_create(self, serializer):
-        # TODO: add check get_object_or_404
+        get_object_or_404(Review, pk=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user)
 
     def get_queryset(self):
