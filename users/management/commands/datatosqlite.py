@@ -1,33 +1,64 @@
+import os
+import uuid
+
+from api_yamdb.settings import BASE_DIR
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
-from api_yamdb.settings import BASE_DIR
-import os
+
+from category.models import Categories, Titles, Genres
 
 User = get_user_model()
 
 
 class Command(BaseCommand):
 
-    def __import_table(self, obj_model, filename, new_names):
+    def __custom_split(self, s):
+        arr = s.split('"')
+        string_replacement = {}
+        for index in range(1, len(arr), 2):
+            uid = str(uuid.uuid4())
+            string_replacement[uid] = arr[index]
+            arr[index] = uid
+
+        s = '"'.join(arr)
+        arr = [x.strip() for x in s.split(',')]
+        for key in string_replacement:
+            arr = [x.replace(key, string_replacement[key]) for x in arr]
+
+        return arr
+
+    def __import_table(self, obj_model, filename, new_names={}, related_keys={}):
 
         path_to_file = os.path.join(BASE_DIR, 'data', filename)
-        with open(path_to_file, 'r') as f:
+        with open(file=path_to_file, mode='r', encoding='utf-8') as f:
 
             names = [x.strip() for x in f.readline().split(',')]
             names = [new_names[x] if x in new_names else x for x in names]
 
             for line in f:
-                values = [x.strip() for x in line.split(',')]
+                values = self.__custom_split(line)
                 properties = dict(zip(names, values))
 
+                # Replace model_id with model object
+                for key in properties:
+                    if key in related_keys:
+                        pk = int(properties[key])
+                        model = related_keys[key]
+                        obj = model.objects.filter(pk=pk).first()
+                        properties[key] = obj
+
                 try:
-                    User.objects.create(**properties)
+                    obj_model.objects.create(**properties)
                 except Exception as e:
                     raise CommandError(f'Error during creation of model with properties {properties}. {e}')
 
     def handle(self, *args, **options):
+
         try:
             User.objects.all().delete()
+            Categories.objects.all().delete()
+            Genres.objects.all().delete()
+            Titles.objects.all().delete()
 
         except Exception as e:
             raise CommandError(f'Users table can not be cleaned. {e}')
@@ -40,3 +71,17 @@ class Command(BaseCommand):
         # IMPORT USERS.CSV
         self.__import_table(User, 'users.csv', {'description': 'bio'})
         self.stdout.write(self.style.SUCCESS('Import users.csv - OK'))
+
+        # IMPORT CATEGORY.CSV
+        self.__import_table(Categories, 'category.csv')
+        self.stdout.write(self.style.SUCCESS('Import category.csv - OK'))
+
+        # IMPORT GENRE.CSV
+        self.__import_table(Genres, 'genre.csv')
+        self.stdout.write(self.style.SUCCESS('Import genre.csv - OK'))
+
+        # IMPORT TITLES.CSV
+        self.__import_table(Titles, 'titles.csv', {}, {
+            'category': Categories
+        })
+        self.stdout.write(self.style.SUCCESS('Import titles.csv - OK'))
