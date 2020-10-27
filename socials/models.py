@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
+from category.models import Titles
+
 User = get_user_model()
 
 
@@ -16,6 +18,11 @@ class Review(models.Model):
     )
     author = models.ForeignKey(
         User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    title = models.ForeignKey(
+        Titles,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
