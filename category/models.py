@@ -25,5 +25,4 @@ class Titles(models.Model):
     genre = models.ManyToManyField(Genres)
     name = models.CharField(max_length=50)
     year = models.PositiveSmallIntegerField()
-    # rating = models.IntegerField(default=None)
     description = models.CharField(max_length=50)
