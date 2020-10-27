@@ -41,9 +41,19 @@ def obtain_confirmation_code(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        username = email[:email.find('@')]
+        user = User.objects.filter(username=username).first()
+
+        if user:
+            return Response(
+                {'username': f'User with username "{username}" already exists. Username must be unique.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         user = User.objects.create_user(
             email=email,
-            password=''
+            password='',
+            username=username
         )
 
         user.confirmation_code = uuid.uuid4()
