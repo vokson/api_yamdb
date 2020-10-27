@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import uuid
+import csv
 
 from api_yamdb.settings import BASE_DIR, DATABASES
 from django.contrib.auth import get_user_model
@@ -10,21 +11,6 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-
-    def __custom_split(self, s):
-        arr = s.split('"')
-        string_replacement = {}
-        for index in range(1, len(arr), 2):
-            uid = str(uuid.uuid4())
-            string_replacement[uid] = arr[index]
-            arr[index] = uid
-
-        s = '"'.join(arr)
-        arr = [x.strip() for x in s.split(',')]
-        for key in string_replacement:
-            arr = [x.replace(key, string_replacement[key]) for x in arr]
-
-        return arr
 
     def __import_table(self, filename, db_table_name, new_names={}, default_props={}):
         conn = None
@@ -38,18 +24,24 @@ class Command(BaseCommand):
         conn.commit()
 
         path_to_file = os.path.join(BASE_DIR, 'data', filename)
-        with open(file=path_to_file, mode='r', encoding='utf-8') as f:
-            names = [x.strip() for x in f.readline().split(',')]
-            names = [new_names[x] if x in new_names else x for x in names]
-            names += default_props.keys()
-            names = ','.join(names)
 
-            for line in f:
-                values = self.__custom_split(line)
-                values += default_props.values()
-                values = [x.strip('"') for x in values]
-                values = ','.join([f'"{x}"' for x in values])
-                cur.execute(f'INSERT INTO {db_table_name} ({names}) VALUES ({values})')
+        with open(file=path_to_file, mode='r', encoding='utf-8') as f:
+            dr = csv.DictReader(f)
+
+            for line in dr:
+                names = list(line.keys())
+                names = [new_names[x] if x in new_names else x for x in names]
+
+                names += list(default_props.keys())
+                questions = ['?']*len(names)
+
+                names = ','.join(names)
+                questions = ','.join(questions)
+
+                values = list(line.values())
+                values += list(default_props.values())
+                values = [tuple(values)]
+                cur.executemany(f'INSERT INTO {db_table_name} ({names}) VALUES ({questions});', values)
 
             conn.commit()
 
@@ -59,7 +51,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         # IMPORT USERS.CSV
-        # self.__import_table(User, 'users.csv', {'description': 'bio'})
         self.__import_table(
             filename='users.csv',
             db_table_name='users_myuser',
@@ -106,6 +97,22 @@ class Command(BaseCommand):
             }
         )
         self.stdout.write(self.style.SUCCESS('Import genre_title.csv - OK'))
+
+        # IMPORT REVIEW.CSV
+        self.__import_table(
+            filename='review.csv',
+            db_table_name='socials_review',
+            new_names={'author': 'author_id'}
+        )
+        self.stdout.write(self.style.SUCCESS('Import review.csv - OK'))
+
+        # IMPORT COMMENT.CSV
+        self.__import_table(
+            filename='comments.csv',
+            db_table_name='socials_comment',
+            new_names={'author': 'author_id'}
+        )
+        self.stdout.write(self.style.SUCCESS('Import comments.csv - OK'))
 
         # CREATE SUPER USER
         User.objects.create_superuser(username='admin', email='admin@yamdb.fake', password='1234')
