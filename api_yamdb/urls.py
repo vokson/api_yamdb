@@ -7,6 +7,5 @@ urlpatterns = [
     path('api/', include('users.urls')),
     path('api/', include('category.urls')),
     path('api/', include('socials.urls')),
-    path('api/', include('category.urls')),
     path('redoc/', TemplateView.as_view(template_name='redoc.html'), name='redoc'),
 ]
