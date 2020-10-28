@@ -54,7 +54,6 @@ class TitleFilter(FilterSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
-    # serializer_class = TitlesSerializer
     permission_classes = [IsReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
