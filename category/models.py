@@ -8,6 +8,9 @@ class Categories(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, unique=True)
 
+    class Meta:
+        ordering = ['slug']
+
     def __str__(self):
         return self.name
 
@@ -15,6 +18,9 @@ class Categories(models.Model):
 class Genres(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ['slug']
 
     def __str__(self):
         return self.name
@@ -26,6 +32,9 @@ class Titles(models.Model):
     name = models.CharField(max_length=50)
     year = models.PositiveSmallIntegerField()
     description = models.CharField(max_length=50)
+
+    class Meta:
+        ordering = ['pk']
 
     def __str__(self):
         return self.name
