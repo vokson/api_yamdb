@@ -1,11 +1,12 @@
+import csv
 import os
 import sqlite3
 import uuid
-import csv
 
-from api_yamdb.settings import BASE_DIR, DATABASES
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+
+from api_yamdb.settings import BASE_DIR, DATABASES
 
 User = get_user_model()
 

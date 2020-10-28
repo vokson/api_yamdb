@@ -3,6 +3,7 @@ import pytest
 from .common import (auth_client, create_categories, create_genre,
                      create_titles, create_users_api)
 
+
 class Test04TitleAPI:
 
     @pytest.mark.django_db(transaction=True)

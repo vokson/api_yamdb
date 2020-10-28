@@ -1,11 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (TokenObtainPairView,
-                                            TokenRefreshView)
 
-from users.views import obtain_confirmation_code, obtain_auth_token
 from .views import CategoryViewSet, GenresViewSet, TitlesViewSet
-
 
 v1_router = DefaultRouter()
 v1_router.register('titles', TitlesViewSet, basename='titles')
