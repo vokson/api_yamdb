@@ -69,6 +69,13 @@ class Command(BaseCommand):
             filename='category.csv',
             db_table_name='category_categories',
         )
+
+        # APPLY CONFIRMATION CODE
+        users = User.objects.all()
+        for user in users:
+            user.confirmation_code = uuid.uuid4()
+            user.save()
+
         self.stdout.write(self.style.SUCCESS('Import category.csv - OK'))
 
         # IMPORT GENRE.CSV

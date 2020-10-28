@@ -1,16 +1,10 @@
-from rest_framework import permissions
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+from loguru import logger
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return (
-                request.method in permissions.SAFE_METHODS
-                or obj.user == request.user
-        )
-
-
-class IsAdminOrReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return (request.method in permissions.SAFE_METHODS or
-                request.user.is_staff or request.user.is_superuser)
+class IsReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        logger.debug('IsReadOnly.has_permission')
+        logger.debug(str(request.method in SAFE_METHODS))
+        return request.method in SAFE_METHODS
