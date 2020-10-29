@@ -1,48 +1,64 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, filters, mixins, viewsets
+from django_filters.rest_framework.filters import CharFilter, NumberFilter
+from django_filters.rest_framework.filterset import FilterSet
+from rest_framework import mixins, viewsets
+from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.viewsets import ViewSetMixin, ModelViewSet
 
 from category.models import Categories, Genres, Titles
-from category.permissions import IsOwnerOrReadOnly
-from category.serializers import GenresSerializer, CategoriesSerializer, TitlesSerializer
+from category.serializers import (CategoriesSerializer, GenresSerializer,
+                                  TitleSerializer_get, TitleSerializer_post)
+from users.permissions import IsAdminRole
+
+from .permissions import IsReadOnly
 
 
-class CreateListViewSet(
+class CreateListDestroyViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
     pass
 
 
-class CategoryViewSet(CreateListViewSet):
+class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
 
 
-class GenresViewSet(CreateListViewSet):
+class GenresViewSet(CreateListDestroyViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
 
 
-class TitlesViewSet(ModelViewSet):
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['category']
+class TitleFilter(FilterSet):
+    category = CharFilter(field_name='category__slug')
+    genre = CharFilter(field_name='genre__slug')
+    name = CharFilter(field_name='name', lookup_expr='contains')
+    year = NumberFilter()
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    class Meta:
+        model = Titles
+        fields = ['category', 'genre', 'name', 'year']
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    queryset = Titles.objects.all()
+    permission_classes = [IsReadOnly | IsAdminRole]
+    pagination_class = PageNumberPagination
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleSerializer_get
+        return TitleSerializer_post
