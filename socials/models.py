@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from category.models import Titles
@@ -27,10 +27,6 @@ class Review(models.Model):
         related_name='reviews'
     )
 
-    class Meta:
-        ordering = ['-pub_date']
-        unique_together = ['author', 'title']
-
 
 class Comment(models.Model):
     text = models.TextField(max_length=200)
@@ -48,6 +44,3 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
-
-    class Meta:
-        ordering = ['-pub_date']

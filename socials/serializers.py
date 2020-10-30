@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from socials.models import Comment, Review
+from socials.models import Review, Comment
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -10,8 +10,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        fields = ('id', 'author', 'text', 'pub_date', 'score', )
         model = Review
-        exclude = ('title', )
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -21,5 +21,5 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        fields = ('id', 'author', 'text', 'pub_date',)
         model = Comment
-        exclude = ('review', )

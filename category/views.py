@@ -1,18 +1,17 @@
-from django_filters.rest_framework.filters import CharFilter, NumberFilter
-from django_filters.rest_framework.filterset import FilterSet
-from rest_framework import mixins, viewsets
+from django_filters.rest_framework import CharFilter, FilterSet, NumberFilter
+from rest_framework import filters, mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 
 from category.models import Categories, Genres, Titles
 from category.serializers import (CategoriesSerializer, GenresSerializer,
-                                  TitleSerializer_get, TitleSerializer_post)
+                                  TitlePostSerializer, TitleViewSerializer)
 from users.permissions import IsAdminRole
 
-from .permissions import IsReadOnly
+from .permissions import IsOwnerOrReadOnly
 
 
-class CreateListDestroyViewSet(
+class CreateListViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
@@ -21,22 +20,22 @@ class CreateListDestroyViewSet(
     pass
 
 
-class CategoryViewSet(CreateListDestroyViewSet):
+class CategoryViewSet(CreateListViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
-    permission_classes = [IsReadOnly | IsAdminRole]
+    permission_classes = [IsOwnerOrReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
     filter_backends = [SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
 
 
-class GenresViewSet(CreateListDestroyViewSet):
+class GenresViewSet(CreateListViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
-    permission_classes = [IsReadOnly | IsAdminRole]
+    permission_classes = [IsOwnerOrReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
-    filter_backends = [SearchFilter]
+    filter_backends = [filters.SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
 
@@ -54,11 +53,11 @@ class TitleFilter(FilterSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
-    permission_classes = [IsReadOnly | IsAdminRole]
+    permission_classes = [IsOwnerOrReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
-            return TitleSerializer_get
-        return TitleSerializer_post
+            return TitleViewSerializer
+        return TitlePostSerializer

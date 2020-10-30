@@ -18,23 +18,7 @@ class GenresSerializer(serializers.ModelSerializer):
         lookup_field = 'slug'
 
 
-class TitleSerializer_post(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Genres.objects.all(),
-        many=True
-    )
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Categories.objects.all()
-    )
-
-    class Meta():
-        fields = '__all__'
-        model = Titles
-
-
-class TitleSerializer_get(serializers.ModelSerializer):
+class TitleViewSerializer(serializers.ModelSerializer):
     genre = GenresSerializer(many=True, read_only=True)
     category = CategoriesSerializer(read_only=True)
     rating = serializers.SerializerMethodField()
@@ -45,3 +29,19 @@ class TitleSerializer_get(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         return obj.reviews.all().aggregate(Avg('score')).get('score__avg')
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genres.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Categories.objects.all(),
+        slug_field='slug',
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Titles
