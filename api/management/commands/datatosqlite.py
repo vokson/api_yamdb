@@ -54,7 +54,7 @@ class Command(BaseCommand):
         # IMPORT USERS.CSV
         self.__import_table(
             filename='users.csv',
-            db_table_name='users_myuser',
+            db_table_name='api_myuser',
             new_names={'description': 'bio'},
             default_props={
                 'password': '',
@@ -68,7 +68,7 @@ class Command(BaseCommand):
         # IMPORT CATEGORY.CSV
         self.__import_table(
             filename='category.csv',
-            db_table_name='users_category',
+            db_table_name='api_category',
         )
 
         # APPLY CONFIRMATION CODE
@@ -82,14 +82,14 @@ class Command(BaseCommand):
         # IMPORT GENRE.CSV
         self.__import_table(
             filename='genre.csv',
-            db_table_name='users_genre',
+            db_table_name='api_genre',
         )
         self.stdout.write(self.style.SUCCESS('Import genre.csv - OK'))
 
         # IMPORT TITLES.CSV
         self.__import_table(
             filename='titles.csv',
-            db_table_name='users_title',
+            db_table_name='api_title',
             new_names={'category': 'category_id'},
             default_props={'description': ''}
         )
@@ -98,14 +98,14 @@ class Command(BaseCommand):
         # IMPORT TITLE_GENRE RELATIONS GENRE_TITLE.CSV
         self.__import_table(
             filename='genre_title.csv',
-            db_table_name='users_title_genre',
+            db_table_name='api_title_genre',
         )
         self.stdout.write(self.style.SUCCESS('Import genre_title.csv - OK'))
 
         # IMPORT REVIEW.CSV
         self.__import_table(
             filename='review.csv',
-            db_table_name='users_review',
+            db_table_name='api_review',
             new_names={'author': 'author_id'}
         )
         self.stdout.write(self.style.SUCCESS('Import review.csv - OK'))
@@ -113,7 +113,7 @@ class Command(BaseCommand):
         # IMPORT COMMENT.CSV
         self.__import_table(
             filename='comments.csv',
-            db_table_name='users_comment',
+            db_table_name='api_comment',
             new_names={'author': 'author_id'}
         )
         self.stdout.write(self.style.SUCCESS('Import comments.csv - OK'))
