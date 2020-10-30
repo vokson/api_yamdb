@@ -1,0 +1,4 @@
+4
+{'id': 4, 'genre': [{'name': 'Ужасы', 'slug': 'horror'}, {'name': 'Комедия', 'slug': 'comedy'}], 'category': {'name': 'Фильм', 'slug': 'films'}, 'rating': None, 'name': 'Поворот туда', 'year': 2000, 'description': 'Крутое пике'}
+{'name': 'Фильм', 'slug': 'films'}
+{'name': 'Фильм', 'slug': 'films'}

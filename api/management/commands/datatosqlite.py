@@ -1,11 +1,12 @@
+import csv
 import os
 import sqlite3
 import uuid
-import csv
 
-from api_yamdb.settings import BASE_DIR, DATABASES
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+
+from api_yamdb.settings import BASE_DIR, DATABASES
 
 User = get_user_model()
 
@@ -53,7 +54,7 @@ class Command(BaseCommand):
         # IMPORT USERS.CSV
         self.__import_table(
             filename='users.csv',
-            db_table_name='users_myuser',
+            db_table_name='api_myuser',
             new_names={'description': 'bio'},
             default_props={
                 'password': '',
@@ -67,21 +68,28 @@ class Command(BaseCommand):
         # IMPORT CATEGORY.CSV
         self.__import_table(
             filename='category.csv',
-            db_table_name='category_categories',
+            db_table_name='api_category',
         )
+
+        # APPLY CONFIRMATION CODE
+        users = User.objects.all()
+        for user in users:
+            user.confirmation_code = uuid.uuid4()
+            user.save()
+
         self.stdout.write(self.style.SUCCESS('Import category.csv - OK'))
 
         # IMPORT GENRE.CSV
         self.__import_table(
             filename='genre.csv',
-            db_table_name='category_genres',
+            db_table_name='api_genre',
         )
         self.stdout.write(self.style.SUCCESS('Import genre.csv - OK'))
 
         # IMPORT TITLES.CSV
         self.__import_table(
             filename='titles.csv',
-            db_table_name='category_titles',
+            db_table_name='api_title',
             new_names={'category': 'category_id'},
             default_props={'description': ''}
         )
@@ -90,18 +98,14 @@ class Command(BaseCommand):
         # IMPORT TITLE_GENRE RELATIONS GENRE_TITLE.CSV
         self.__import_table(
             filename='genre_title.csv',
-            db_table_name='category_titles_genre',
-            new_names={
-                'title_id': 'titles_id',
-                'genre_id': 'genres_id'
-            }
+            db_table_name='api_title_genre',
         )
         self.stdout.write(self.style.SUCCESS('Import genre_title.csv - OK'))
 
         # IMPORT REVIEW.CSV
         self.__import_table(
             filename='review.csv',
-            db_table_name='socials_review',
+            db_table_name='api_review',
             new_names={'author': 'author_id'}
         )
         self.stdout.write(self.style.SUCCESS('Import review.csv - OK'))
@@ -109,7 +113,7 @@ class Command(BaseCommand):
         # IMPORT COMMENT.CSV
         self.__import_table(
             filename='comments.csv',
-            db_table_name='socials_comment',
+            db_table_name='api_comment',
             new_names={'author': 'author_id'}
         )
         self.stdout.write(self.style.SUCCESS('Import comments.csv - OK'))
