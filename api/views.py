@@ -6,17 +6,16 @@ from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import CharFilter, FilterSet, NumberFilter
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Category, Genre, MyUserManager, Review, Title
-from .permissions import (IsAdminOrIsModerator, IsAdminRole, IsAllowToView,
-                          IsAuthorOrReadOnly, IsOwnerOrReadOnly)
+from .permissions import IsAdminRole, IsAllowToView, IsReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TitleViewSerializer,
@@ -26,7 +25,6 @@ User = get_user_model()
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
 def obtain_confirmation_code(request):
 
     email = request.data.get('email')
@@ -79,7 +77,6 @@ def obtain_confirmation_code(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
 def obtain_auth_token(request):
 
     user = User.objects.filter(
@@ -135,7 +132,7 @@ class CreateListViewSet(
 class CategoryViewSet(CreateListViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsOwnerOrReadOnly | IsAdminRole]
+    permission_classes = [IsReadOnly | IsAdminRole | IsAdminUser]
     pagination_class = PageNumberPagination
     filter_backends = [SearchFilter]
     search_fields = ['name']
@@ -145,7 +142,7 @@ class CategoryViewSet(CreateListViewSet):
 class GenreViewSet(CreateListViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [IsOwnerOrReadOnly | IsAdminRole]
+    permission_classes = [IsReadOnly | IsAdminRole | IsAdminUser]
     pagination_class = PageNumberPagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
@@ -165,7 +162,7 @@ class TitleFilter(FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    permission_classes = [IsOwnerOrReadOnly | IsAdminRole]
+    permission_classes = [IsReadOnly | IsAdminRole | IsAdminUser]
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
 
@@ -177,7 +174,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewView(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthorOrReadOnly | IsAdminOrIsModerator | IsAllowToView]
+    permission_classes = [IsAllowToView]
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -193,7 +190,7 @@ class ReviewView(viewsets.ModelViewSet):
 
 class CommentView(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthorOrReadOnly | IsAdminOrIsModerator | IsAllowToView]
+    permission_classes = [IsAllowToView]
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
