@@ -173,6 +173,9 @@ class Review(models.Model):
         related_name='reviews'
     )
 
+    class Meta:
+        ordering = ['-pub_date']
+
 
 class Comment(models.Model):
     text = models.TextField(max_length=200)
@@ -190,3 +193,6 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
+
+    class Meta:
+        ordering = ['-pub_date']

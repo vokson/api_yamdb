@@ -1,13 +1,13 @@
 import uuid
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import CharFilter, FilterSet, NumberFilter
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -21,8 +21,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TitleViewSerializer,
                           UserSerializer)
-
-from loguru import logger
 
 User = get_user_model()
 
@@ -184,16 +182,8 @@ class ReviewView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         author = self.request.user
-
-        logger.debug('HERE')
         if Review.objects.filter(title=title, author=author).count() > 0:
-            logger.debug('>0')
-            # return Response(
-            #     {'title': 'Author may have only one review for title'},
-            #     status=status.HTTP_400_BAD_REQUEST
-            # )
             raise ValidationError({'title': 'Author may have only one review for title'})
-        logger.debug('save')
         serializer.save(author=author, title=title)
 
     def get_queryset(self):
