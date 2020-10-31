@@ -16,14 +16,15 @@ class IsReadOnly(BasePermission):
         return request.method in SAFE_METHODS
 
 
-class IsAllowToView(IsAuthenticatedOrReadOnly):
+class RetrieveOnlyOrHasCUDPermissions(IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         if view.action == 'retrieve':
             return True
 
+        request_user = request.user
         return (
-            request.user.is_superuser or
-            request.user.is_admin or
-            request.user.is_moderator or
-            obj.author == request.user
+            request_user.is_superuser
+            or request_user.is_admin
+            or request_user.is_moderator
+            or request_user == obj.author
         )
