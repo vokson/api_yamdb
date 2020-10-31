@@ -64,7 +64,6 @@ class Command(BaseCommand):
                 'is_staff': '0',
                 'is_superuser': '0',
                 'date_joined': timezone.now()
-                # 'is_admin': '0',
             }
         )
         self.stdout.write(self.style.SUCCESS('Import users.csv - OK'))
@@ -78,7 +77,6 @@ class Command(BaseCommand):
         # CREATE SUPER USER
         User.objects.create_superuser(username='admin', email='admin@yamdb.fake', password='1234')
         self.stdout.write(self.style.SUCCESS('Create super user admin/admin@yamdb.fake/1234 - OK'))
-
 
         # IMPORT CATEGORY.CSV
         self.__import_table(
