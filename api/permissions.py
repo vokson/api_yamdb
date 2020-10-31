@@ -1,15 +1,13 @@
-from django.contrib.auth import get_user_model
 from rest_framework.permissions import (SAFE_METHODS, BasePermission,
+                                        IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 
-User = get_user_model()
+from .models import User
 
 
-class IsAdminRole(BasePermission):
+class IsAdminRole(IsAuthenticated):
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return User.ADMIN == request.user.role
-        return False
+        return super().has_permission(request, view) and request.user.is_admin
 
 
 class IsReadOnly(BasePermission):
@@ -23,7 +21,7 @@ class IsAllowToView(IsAuthenticatedOrReadOnly):
             return True
 
         return (
-            request.user.is_staff or
-            request.user.role in (User.MODERATOR, User.ADMIN,) or
+            request.user.is_admin or
+            request.user.is_moderator or
             obj.author == request.user
         )

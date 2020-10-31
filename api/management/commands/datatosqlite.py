@@ -2,6 +2,7 @@ import csv
 import os
 import sqlite3
 import uuid
+from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -60,22 +61,30 @@ class Command(BaseCommand):
                 'password': '',
                 'confirmation_code': '',
                 'is_active': '1',
-                'is_admin': '0'
+                'is_staff': '0',
+                'is_superuser': '0',
+                'date_joined': timezone.now()
+                # 'is_admin': '0',
             }
         )
         self.stdout.write(self.style.SUCCESS('Import users.csv - OK'))
-
-        # IMPORT CATEGORY.CSV
-        self.__import_table(
-            filename='category.csv',
-            db_table_name='api_category',
-        )
 
         # APPLY CONFIRMATION CODE
         users = User.objects.all()
         for user in users:
             user.confirmation_code = uuid.uuid4()
             user.save()
+
+        # CREATE SUPER USER
+        User.objects.create_superuser(username='admin', email='admin@yamdb.fake', password='1234')
+        self.stdout.write(self.style.SUCCESS('Create super user admin/admin@yamdb.fake/1234 - OK'))
+
+
+        # IMPORT CATEGORY.CSV
+        self.__import_table(
+            filename='category.csv',
+            db_table_name='api_category',
+        )
 
         self.stdout.write(self.style.SUCCESS('Import category.csv - OK'))
 
@@ -118,6 +127,4 @@ class Command(BaseCommand):
         )
         self.stdout.write(self.style.SUCCESS('Import comments.csv - OK'))
 
-        # CREATE SUPER USER
-        User.objects.create_superuser(username='admin', email='admin@yamdb.fake', password='1234')
-        self.stdout.write(self.style.SUCCESS('Create super user admin/admin@yamdb.fake/1234 - OK'))
+        

@@ -71,5 +71,5 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
-admin.site.register(MyUser, UserAdmin)
+# admin.site.register(MyUser, UserAdmin)
 admin.site.unregister(Group)

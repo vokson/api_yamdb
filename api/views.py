@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Category, Genre, MyUserManager, Review, Title
+from .models import Category, Genre, Review, Title
 from .permissions import IsAdminRole, IsAllowToView, IsReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
@@ -35,7 +35,7 @@ def obtain_confirmation_code(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    email = MyUserManager.normalize_email(email)
+    # email = MyUserManager.normalize_email(email)
     user = User.objects.filter(email=email).first()
 
     if not user:
@@ -59,7 +59,8 @@ def obtain_confirmation_code(request):
         user = User.objects.create_user(
             email=email,
             password='',
-            username=username
+            username=username,
+            is_active=False
         )
 
         user.confirmation_code = uuid.uuid4()
@@ -88,6 +89,9 @@ def obtain_auth_token(request):
         content = {'detail': 'No active account found with the given credentials'}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
+    user.is_active = True
+    user.save()
+
     refresh = RefreshToken.for_user(user)
     return Response({'token': str(refresh.access_token)})
 
@@ -95,7 +99,7 @@ def obtain_auth_token(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminRole | IsAdminUser]
+    permission_classes = [IsAdminRole]
     filterset_fields = ['username']
     lookup_field = 'username'
 
