@@ -150,7 +150,7 @@ class Review(models.Model):
         verbose_name_plural = 'reviews'
 
     def __str__(self):
-        return self.name
+        return self.text
 
 
 class Comment(models.Model):
@@ -179,4 +179,4 @@ class Comment(models.Model):
         verbose_name_plural = 'comments'
 
     def __str__(self):
-        return self.name
+        return self.text
