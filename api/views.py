@@ -171,8 +171,6 @@ class ReviewView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         author = self.request.user
-        if Review.objects.filter(title=title, author=author).count() > 0:
-            raise ValidationError({'title': 'Author may have only one review for title'})
         serializer.save(author=author, title=title)
 
     def get_queryset(self):
