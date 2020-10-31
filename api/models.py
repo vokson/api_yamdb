@@ -27,12 +27,6 @@ class MyUser(AbstractUser):
         default=Role.USER
     )
 
-    confirmation_code = models.CharField(
-        max_length=128,
-        verbose_name='Confirmation Code',
-        help_text='Input confirmation code',
-    )
-
     bio = models.TextField(
         blank=True,
         verbose_name='Description',

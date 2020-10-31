@@ -1,13 +1,33 @@
 from django.db.models import Avg
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from .models import Category, Comment, Genre, MyUser, Review, Title
+from .models import Category, Comment, Genre, User, Review, Title
+
+
+class ObtainCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(
+            queryset=User.objects.all()
+        )]
+    )
+    username = serializers.CharField(
+        max_length=150,
+        validators=[UniqueValidator(
+            queryset=User.objects.all()
+        )]
+    )
+
+
+class ObtainTokenSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    confirmation_code = serializers.CharField(max_length=128)
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('first_name', 'last_name', 'username', 'bio', 'email', 'role', )
-        model = MyUser
+        model = User
 
 
 class CategorySerializer(serializers.ModelSerializer):
