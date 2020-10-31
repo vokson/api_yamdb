@@ -6,87 +6,75 @@ from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import CharFilter, FilterSet, NumberFilter
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from api_yamdb.settings import DEFAULT_FROM_EMAIL
 
 from .models import Category, Genre, Review, Title
 from .permissions import IsAdminRole, IsAllowToView, IsReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TitleViewSerializer,
-                          UserSerializer)
+                          UserSerializer, ObtainCodeSerializer, ObtainTokenSerializer)
+
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 User = get_user_model()
+token_generator = PasswordResetTokenGenerator()
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def obtain_confirmation_code(request):
 
-    email = request.data.get('email')
+    serializer = ObtainCodeSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-    if not email:
-        return Response(
-            {'email': 'Users must have an email address'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    email = serializer.validated_data.get('email')
+    username = serializer.validated_data.get('username')
 
-    # email = MyUserManager.normalize_email(email)
-    user = User.objects.filter(email=email).first()
+    user, created = User.objects.get_or_create(
+        email=email,
+        username=username
+    )
 
-    if not user:
-        try:
-            validate_email(email)
-        except ValidationError as e:
-            return Response(
-                {'email': e.message},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        username = email[:email.find('@')]
-        user = User.objects.filter(username=username).first()
-
-        if user:
-            return Response(
-                {'username': f'User with username "{username}" already exists. Username must be unique.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        user = User.objects.create_user(
-            email=email,
-            password='',
-            username=username,
-            is_active=False
-        )
-
-        user.confirmation_code = uuid.uuid4()
+    if created:
+        user.is_active = False
         user.save()
+
+    confirmation_code = token_generator.make_token(user)
 
     send_mail(
         'Api YamDb - Confirmation',
-        f'Your confirmation code is {user.confirmation_code}',
-        'api@yamdb.com',
+        f'Your confirmation code is {confirmation_code}',
+        DEFAULT_FROM_EMAIL,
         [email],
         fail_silently=False,
     )
 
-    return Response({'email': email})
+    return Response({'email': email}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def obtain_auth_token(request):
 
-    user = User.objects.filter(
-        email=request.data.get('email'),
-        confirmation_code=request.data.get('confirmation_code'),
-    ).first()
+    serializer = ObtainTokenSerializer(data=request.data)
+    serializer.is_valid()
 
-    if not user:
-        content = {'detail': 'No active account found with the given credentials'}
+    email = serializer.validated_data.get('email')
+    user = get_object_or_404(User, email=email)
+
+    confirmation_code = serializer.validated_data.get('confirmation_code')
+
+    if not token_generator.check_token(user, confirmation_code):
+        content = {'confirmation_code': ['No active account found with the given credentials']}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
     user.is_active = True

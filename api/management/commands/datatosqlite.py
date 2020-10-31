@@ -59,7 +59,6 @@ class Command(BaseCommand):
             new_names={'description': 'bio'},
             default_props={
                 'password': '',
-                'confirmation_code': '',
                 'is_active': '1',
                 'is_staff': '0',
                 'is_superuser': '0',
@@ -67,12 +66,6 @@ class Command(BaseCommand):
             }
         )
         self.stdout.write(self.style.SUCCESS('Import users.csv - OK'))
-
-        # APPLY CONFIRMATION CODE
-        users = User.objects.all()
-        for user in users:
-            user.confirmation_code = uuid.uuid4()
-            user.save()
 
         # CREATE SUPER USER
         User.objects.create_superuser(username='admin', email='admin@yamdb.fake', password='1234')

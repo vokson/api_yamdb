@@ -10,7 +10,7 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email', 'username', 'confirmation_code', 'role', 'is_admin', 'is_active')
+    list_display = ('email', 'username', 'role', 'is_admin', 'is_active')
     list_filter = ('role', 'is_active', )
 
     fieldsets = (
@@ -20,7 +20,7 @@ class UserAdmin(BaseUserAdmin):
         ),
         (
             'Access',
-            {'fields': ('is_active', 'confirmation_code')}
+            {'fields': ('is_active',)}
         ),
         (
             'Credentials',
