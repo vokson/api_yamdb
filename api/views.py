@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Category, Genre, Review, Title
-from .permissions import IsAdminRole, IsAllowToView, IsReadOnly
+from .permissions import IsAdminRole, RetrieveOnlyOrHasCUDPermissions, IsReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TitleViewSerializer,
@@ -178,7 +178,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewView(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAllowToView]
+    permission_classes = [RetrieveOnlyOrHasCUDPermissions]
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -194,7 +194,7 @@ class ReviewView(viewsets.ModelViewSet):
 
 class CommentView(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAllowToView]
+    permission_classes = [RetrieveOnlyOrHasCUDPermissions]
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
