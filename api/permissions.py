@@ -2,12 +2,13 @@ from rest_framework.permissions import (SAFE_METHODS, BasePermission,
                                         IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 
-from .models import User
-
 
 class IsAdminRole(IsAuthenticated):
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.is_admin
+        return (
+            super().has_permission(request, view) and
+            (request.user.is_admin or request.user.is_superuser)
+        )
 
 
 class IsReadOnly(BasePermission):
@@ -21,6 +22,7 @@ class IsAllowToView(IsAuthenticatedOrReadOnly):
             return True
 
         return (
+            request.user.is_superuser or
             request.user.is_admin or
             request.user.is_moderator or
             obj.author == request.user
