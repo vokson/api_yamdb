@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from datetime import datetime
 
 
 class Role(models.TextChoices):
@@ -15,6 +16,7 @@ class MyUser(AbstractUser):
         verbose_name='E-mail',
         help_text='Input e-mail',
         unique=True,
+        db_index=True
     )
 
     role = models.CharField(
@@ -66,7 +68,8 @@ class Category(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        help_text='Input a category name'
+        help_text='Input a category name',
+        db_index=True
     )
 
     class Meta:
@@ -86,7 +89,8 @@ class Genre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        help_text='Input a genre name'
+        help_text='Input a genre name',
+        db_index=True
     )
 
     class Meta:
@@ -103,12 +107,14 @@ class Title(models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='title'
+        related_name='titles'
     )
     genre = models.ManyToManyField(Genre)
     name = models.CharField(max_length=50)
     year = models.PositiveSmallIntegerField(
-        help_text='Input year'
+        help_text='Input year',
+        validators=[MaxValueValidator(datetime.today().year)],
+        db_index=True
     )
     description = models.CharField(
         max_length=50,
@@ -130,7 +136,7 @@ class Review(models.Model):
         'Дата публикации',
         auto_now_add=True
     )
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     author = models.ForeignKey(
@@ -150,7 +156,7 @@ class Review(models.Model):
         verbose_name_plural = 'reviews'
 
     def __str__(self):
-        return self.name
+        return self.text
 
 
 class Comment(models.Model):
@@ -177,6 +183,7 @@ class Comment(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'comment'
         verbose_name_plural = 'comments'
+        unique_together = (('author', 'review'),)
 
     def __str__(self):
-        return self.name
+        return self.text
