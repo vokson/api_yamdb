@@ -59,37 +59,66 @@ User = get_user_model()
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(
+        max_length=50,
+        help_text='Input name of field'
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        help_text='Input a category name'
+    )
 
     class Meta:
         ordering = ['slug']
+        verbose_name = 'category'
+        verbose_name_plural = 'categories'
 
     def __str__(self):
         return self.name
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(
+        max_length=50,
+        help_text='Input name of field'
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        help_text='Input a genre name'
+    )
 
     class Meta:
         ordering = ['slug']
+        verbose_name = 'genre'
+        verbose_name_plural = 'genres'
 
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
-                                 null=True, related_name='title')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='title'
+    )
     genre = models.ManyToManyField(Genre)
     name = models.CharField(max_length=50)
-    year = models.PositiveSmallIntegerField()
-    description = models.CharField(max_length=50)
+    year = models.PositiveSmallIntegerField(
+        help_text='Input year'
+    )
+    description = models.CharField(
+        max_length=50,
+        help_text='Input description'
+    )
 
     class Meta:
         ordering = ['pk']
+        verbose_name = 'title'
+        verbose_name_plural = 'titles'
 
     def __str__(self):
         return self.name
@@ -117,10 +146,18 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
+        verbose_name = 'review'
+        verbose_name_plural = 'reviews'
+
+    def __str__(self):
+        return self.name
 
 
 class Comment(models.Model):
-    text = models.TextField(max_length=200)
+    text = models.TextField(
+        max_length=200,
+        help_text='Input your comment'
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -138,3 +175,8 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
+        verbose_name = 'comment'
+        verbose_name_plural = 'comments'
+
+    def __str__(self):
+        return self.name
