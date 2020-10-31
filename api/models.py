@@ -130,7 +130,7 @@ class Review(models.Model):
         'Дата публикации',
         auto_now_add=True
     )
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     author = models.ForeignKey(
@@ -177,6 +177,7 @@ class Comment(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'comment'
         verbose_name_plural = 'comments'
+        unique_together = (('author', 'review'),)
 
     def __str__(self):
         return self.text
