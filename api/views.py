@@ -84,6 +84,7 @@ def obtain_auth_token(request):
     return Response({'token': str(refresh.access_token)})
 
 
+@api_view(['GET', 'PATCH'])
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
