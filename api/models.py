@@ -177,7 +177,6 @@ class Comment(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'comment'
         verbose_name_plural = 'comments'
-        unique_together = (('author', 'review'),)
 
     def __str__(self):
         return self.text

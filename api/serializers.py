@@ -1,8 +1,9 @@
 from django.db.models import Avg
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework.validators import UniqueValidator
 
 from .models import Category, Comment, Genre, User, Review, Title
+from .validations import uniq_review
 
 
 class ObtainCodeSerializer(serializers.Serializer):
@@ -26,7 +27,7 @@ class ObtainTokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('first_name', 'last_name', 'username', 'bio', 'email', 'role', )
+        fields = ('first_name', 'last_name', 'username', 'bio', 'email', 'role',)
         model = User
 
 
@@ -79,8 +80,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    def validate(self, data):
+        view = self.context.get('view')
+        if view.action == 'create':
+            return uniq_review(self.context, data)
+        return data
+
     class Meta:
-        fields = ('id', 'author', 'text', 'pub_date', 'score', )
+        fields = ('id', 'author', 'text', 'pub_date', 'score',)
         model = Review
 
 
