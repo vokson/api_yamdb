@@ -8,7 +8,7 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.tokens import AccessToken
 
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
 
@@ -24,8 +24,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 User = get_user_model()
 token_generator = PasswordResetTokenGenerator()
-
-from loguru import logger
 
 
 @api_view(['POST'])
@@ -106,11 +104,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 partial=True
             )
             serializer.is_valid(raise_exception=True)
-
-            role = serializer.validated_data.get('role')
-            if role is not None and not (request.user.is_admin or request.user.is_moderator):
-                content = {'role': ['User can not change role']}
-                return Response(content, status=status.HTTP_400_BAD_REQUEST)
+            serializer.validated_data['role'] = request.user.role
 
             self.perform_update(serializer)
             return Response(serializer.data)
