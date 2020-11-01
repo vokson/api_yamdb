@@ -148,6 +148,7 @@ class Review(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'review'
         verbose_name_plural = 'reviews'
+        unique_together = ['author', 'title']
 
     def __str__(self):
         return self.text
