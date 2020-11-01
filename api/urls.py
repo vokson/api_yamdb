@@ -13,8 +13,12 @@ router_v1.register('categories', CategoryViewSet, basename='categories')
 router_v1.register(r'titles/(?P<title_id>\d+)/reviews', ReviewView, basename='reviews')
 router_v1.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments', CommentView, basename='comments')
 
+auth_urls = [
+    path('email/', obtain_confirmation_code, name='confirmation_code_obtain'),
+    path('token/', obtain_auth_token, name='token_obtain_pair')
+]
+
 urlpatterns = [
-    path('v1/auth/email/', obtain_confirmation_code, name='confirmation_token_obtain'),
-    path('v1/auth/token/', obtain_auth_token, name='token_obtain_pair'),
+    path('v1/auth/', include(auth_urls)),
     path('v1/', include(router_v1.urls)),
 ]
