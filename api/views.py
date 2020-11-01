@@ -13,6 +13,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Avg
 
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
 
@@ -159,7 +160,7 @@ class TitleFilter(FilterSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = [IsReadOnly | IsAdminRole | IsAdminUser]
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
