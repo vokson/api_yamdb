@@ -6,8 +6,11 @@ from rest_framework.permissions import (SAFE_METHODS, BasePermission,
 class IsAdminRole(IsAuthenticated):
     def has_permission(self, request, view):
         return (
-            super().has_permission(request, view) and
-            (request.user.is_admin or request.user.is_superuser)
+            super().has_permission(request, view)
+            and (
+                request.user.is_admin
+                or request.user.is_superuser
+            )
         )
 
 

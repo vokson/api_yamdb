@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404
-
 from rest_framework.exceptions import ValidationError
 
-from api.models import Title, Review
+from api.models import Review, Title
 
 
 def uniq_review(context, data):

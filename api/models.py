@@ -1,8 +1,9 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from datetime import datetime
 
 
 class Role(models.TextChoices):
@@ -14,14 +15,14 @@ class Role(models.TextChoices):
 class MyUser(AbstractUser):
     email = models.EmailField(
         verbose_name='E-mail',
-        help_text='Input e-mail',
+        help_text='Введите e-mail',
         unique=True,
         db_index=True
     )
 
     role = models.CharField(
-        verbose_name='Role',
-        help_text='Choose role',
+        verbose_name='Роль',
+        help_text='Выберите роль',
         max_length=30,
         choices=Role.choices,
         default=Role.USER
@@ -29,8 +30,8 @@ class MyUser(AbstractUser):
 
     bio = models.TextField(
         blank=True,
-        verbose_name='Description',
-        help_text='Add description'
+        verbose_name='Описание',
+        help_text='Добавьте описание'
     )
 
     USERNAME_FIELD = 'email'
@@ -57,12 +58,14 @@ User = get_user_model()
 class Category(models.Model):
     name = models.CharField(
         max_length=50,
-        help_text='Input name of field'
+        verbose_name='Наименование',
+        help_text='Введите имя'
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        help_text='Input a category name',
+        verbose_name='Идентификатор',
+        help_text='Введите идентификатор',
         db_index=True
     )
 
@@ -78,12 +81,14 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(
         max_length=50,
-        help_text='Input name of field'
+        verbose_name='Наименование',
+        help_text='Введите имя'
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        help_text='Input a genre name',
+        verbose_name='Идентификатор',
+        help_text='Введите идентификатор',
         db_index=True
     )
 
@@ -104,15 +109,21 @@ class Title(models.Model):
         related_name='titles'
     )
     genre = models.ManyToManyField(Genre)
-    name = models.CharField(max_length=50)
+    name = models.CharField(
+        verbose_name='Наименование',
+        help_text='Введите имя',
+        max_length=50
+    )
     year = models.PositiveSmallIntegerField(
-        help_text='Input year',
+        verbose_name='Год',
+        help_text='Введите год',
         validators=[MaxValueValidator(datetime.today().year)],
         db_index=True
     )
     description = models.CharField(
         max_length=50,
-        help_text='Input description'
+        verbose_name='Описание',
+        help_text='Введите описание'
     )
 
     class Meta:
@@ -127,10 +138,13 @@ class Title(models.Model):
 class Review(models.Model):
     text = models.TextField(max_length=500)
     pub_date = models.DateTimeField(
-        'Дата публикации',
+        verbose_name='Дата публикации',
+        help_text='Введите дату',
         auto_now_add=True
     )
     score = models.PositiveSmallIntegerField(
+        verbose_name='Оценка',
+        help_text='Поставьте оценку',
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     author = models.ForeignKey(
@@ -156,8 +170,9 @@ class Review(models.Model):
 
 class Comment(models.Model):
     text = models.TextField(
-        max_length=200,
-        help_text='Input your comment'
+        verbose_name='Текст',
+        help_text='Введите комментарий',
+        max_length=200
     )
     author = models.ForeignKey(
         User,
@@ -165,7 +180,8 @@ class Comment(models.Model):
         related_name='comments'
     )
     pub_date = models.DateTimeField(
-        'Дата публикации',
+        verbose_name='Дата публикации',
+        help_text='Введите дату',
         auto_now_add=True
     )
     review = models.ForeignKey(

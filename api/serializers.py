@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import Category, Comment, Genre, User, Review, Title
+from .models import Category, Comment, Genre, Review, Title, User
 from .validations import uniq_review
 
 
@@ -83,7 +83,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         return data
 
     class Meta:
-        fields = ('id', 'author', 'text', 'pub_date', 'score',)
+        exclude = ('title',)
         model = Review
 
 
@@ -94,5 +94,5 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'author', 'text', 'pub_date',)
+        exclude = ('review',)
         model = Comment

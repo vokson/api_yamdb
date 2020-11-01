@@ -1,11 +1,10 @@
 import csv
 import os
 import sqlite3
-import uuid
-from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from api_yamdb.settings import BASE_DIR, DATABASES
 
@@ -117,5 +116,3 @@ class Command(BaseCommand):
             new_names={'author': 'author_id'}
         )
         self.stdout.write(self.style.SUCCESS('Import comments.csv - OK'))
-
-        
