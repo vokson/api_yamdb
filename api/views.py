@@ -8,7 +8,7 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
 
@@ -24,6 +24,8 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 User = get_user_model()
 token_generator = PasswordResetTokenGenerator()
+
+from loguru import logger
 
 
 @api_view(['POST'])
@@ -77,8 +79,7 @@ def obtain_auth_token(request):
     user.is_active = True
     user.save()
 
-    refresh = RefreshToken.for_user(user)
-    return Response({'token': str(refresh.access_token)})
+    return Response({'token': str(AccessToken.for_user(user))})
 
 
 class UserViewSet(viewsets.ModelViewSet):
