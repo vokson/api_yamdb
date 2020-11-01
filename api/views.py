@@ -131,8 +131,7 @@ class CreateListViewSet(
 class CategoryViewSet(CreateListViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsReadOnly | IsAdminRole | IsAdminUser]
-    pagination_class = PageNumberPagination
+    permission_classes = [IsReadOnly | IsAdminRole]
     filter_backends = [SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
@@ -141,8 +140,7 @@ class CategoryViewSet(CreateListViewSet):
 class GenreViewSet(CreateListViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [IsReadOnly | IsAdminRole | IsAdminUser]
-    pagination_class = PageNumberPagination
+    permission_classes = [IsReadOnly | IsAdminRole]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
@@ -161,8 +159,7 @@ class TitleFilter(FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
-    permission_classes = [IsReadOnly | IsAdminRole | IsAdminUser]
-    pagination_class = PageNumberPagination
+    permission_classes = [IsReadOnly | IsAdminRole]
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
