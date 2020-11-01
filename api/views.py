@@ -84,7 +84,6 @@ def obtain_auth_token(request):
     return Response({'token': str(refresh.access_token)})
 
 
-@api_view(['GET', 'PATCH'])
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -93,7 +92,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
     @action(
-        methods=['get', 'patch'],
+        methods=['GET', 'PATCH'],
         detail=False,
         permission_classes=[IsAuthenticated]
     )
@@ -109,6 +108,12 @@ class UserViewSet(viewsets.ModelViewSet):
                 partial=True
             )
             serializer.is_valid(raise_exception=True)
+
+            role = serializer.validated_data.get('role')
+            if role is not None and not (request.user.is_admin or request.user.is_moderator):
+                content = {'role': ['User can not change role']}
+                return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
             self.perform_update(serializer)
             return Response(serializer.data)
 
