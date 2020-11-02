@@ -15,7 +15,7 @@ router_v1.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comment
 
 auth_urls = [
     path('email/', obtain_confirmation_code, name='confirmation_code_obtain'),
-    path('token/', obtain_auth_token, name='token_obtain_pair')
+    path('token/', obtain_auth_token, name='token_obtain')
 ]
 
 urlpatterns = [
