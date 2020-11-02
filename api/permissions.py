@@ -7,10 +7,7 @@ class IsAdminRole(IsAuthenticated):
     def has_permission(self, request, view):
         return (
             super().has_permission(request, view)
-            and (
-                request.user.is_admin
-                or request.user.is_superuser
-            )
+            and request.user.is_admin
         )
 
 
@@ -26,8 +23,7 @@ class RetrieveOnlyOrHasCUDPermissions(IsAuthenticatedOrReadOnly):
 
         request_user = request.user
         return (
-            request_user.is_superuser
-            or request_user.is_admin
+            request_user.is_admin
             or request_user.is_moderator
             or request_user == obj.author
         )
