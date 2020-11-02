@@ -97,17 +97,14 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(request.user)
             return Response(serializer.data)
 
-        if request.method == 'PATCH':
-            serializer = self.get_serializer(
-                request.user,
-                data=request.data,
-                partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.validated_data['role'] = request.user.role
-
-            self.perform_update(serializer)
-            return Response(serializer.data)
+        serializer = self.get_serializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
+        return Response(serializer.data)
 
 
 class CreateListViewSet(
