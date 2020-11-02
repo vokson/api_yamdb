@@ -7,9 +7,9 @@ from django.db import models
 
 
 class Role(models.TextChoices):
-    ADMIN = 'admin', 'admin'
-    MODERATOR = 'moderator', 'moderator'
-    USER = 'user', 'user'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
 
 
 class MyUser(AbstractUser):
@@ -33,9 +33,6 @@ class MyUser(AbstractUser):
         verbose_name='Описание',
         help_text='Добавьте описание'
     )
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
 
     class Meta:
         ordering = ['email']
