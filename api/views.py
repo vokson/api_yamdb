@@ -33,8 +33,8 @@ def obtain_confirmation_code(request):
     serializer = ObtainCodeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
-    email = serializer.validated_data.get('email')
-    username = serializer.validated_data.get('username')
+    email = request.data.get('email')
+    username = request.data.get('username')
 
     user, created = User.objects.get_or_create(
         email=email,
@@ -50,7 +50,7 @@ def obtain_confirmation_code(request):
     send_mail(
         'Api YamDb - Confirmation',
         f'Your confirmation code is {confirmation_code}',
-        DEFAULT_FROM_EMAIL,
+        None,
         [email],
         fail_silently=False,
     )
@@ -63,7 +63,7 @@ def obtain_confirmation_code(request):
 def obtain_auth_token(request):
 
     serializer = ObtainTokenSerializer(data=request.data)
-    serializer.is_valid()
+    serializer.is_valid(raise_exception=True)
 
     email = serializer.validated_data.get('email')
     user = get_object_or_404(User, email=email)
