@@ -120,7 +120,8 @@ class Title(models.Model):
     description = models.CharField(
         max_length=50,
         verbose_name='Описание',
-        help_text='Введите описание'
+        help_text='Введите описание',
+        blank=True
     )
 
     class Meta:
