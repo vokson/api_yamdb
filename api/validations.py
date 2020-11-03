@@ -7,8 +7,6 @@ from api.models import Review, Title
 def uniq_review(context, data):
     request = context.get('request')
     author = request.user
-    # view = context.get('view')
-    # title_id = view.kwargs.get('title_id')
     title_id = request.parser_context['kwargs']['title_id']
     title = get_object_or_404(Title, pk=title_id)
 

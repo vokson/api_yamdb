@@ -10,8 +10,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api_yamdb.settings import DEFAULT_FROM_EMAIL
-
 from .filters import TitleFilter
 from .models import Category, Genre, Review, Title
 from .permissions import (IsAdminRole, IsReadOnly,
