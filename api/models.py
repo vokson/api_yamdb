@@ -109,7 +109,7 @@ class Title(models.Model):
     name = models.CharField(
         verbose_name='Наименование',
         help_text='Введите имя',
-        max_length=50
+        max_length=100
     )
     year = models.PositiveSmallIntegerField(
         verbose_name='Год',
